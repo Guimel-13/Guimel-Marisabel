@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para ti, mi amor</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- PANTALLA 1: Escáner de Huella -->
+    <section id="screen1" class="screen active">
+        <h1 class="title-cursive">Para ti, mi amor</h1>
+        
+        <div class="fingerprint-container" id="fingerprintArea">
+            <!-- Brillo de fondo estético -->
+            <div class="glow-background"></div>
+            
+            <svg class="progress-ring" width="150" height="150">
+                <circle class="progress-ring__circle" stroke="#ff1e56" stroke-width="4" fill="transparent" r="68" cx="75" cy="75"/>
+            </svg>
+            <i class="fa-solid fa-fingerprint fingerprint-icon" id="fingerprintBtn"></i>
+            
+            <!-- NUEVO: Línea de láser -->
+            <div class="scanner-line"></div>
+        </div>
+        
+        <p class="scan-text" id="scanText">Mantén presionado para escanear...</p>
+
+        <button id="btnIngresar" class="btn-next hidden" onclick="ingresar()">Ingresar <i class="fa-solid fa-heart"></i></button>
+    </section>
+
+    <!-- PANTALLA 2: Total de Días -->
+    <section id="screen2" class="screen hidden">
+
+        <button class="btn-back" onclick="goBack(2, 1)"><i class="fa-solid fa-arrow-left"></i></button>
+
+        <div class="card">
+            <img src="img/foto1.jpeg" alt="Guimel y Marisabel" class="main-photo">
+            <div class="stats-simple">
+                <h2 id="total-days">0 <i class="fa-solid fa-heart heart-icon"></i></h2>
+                <h3>días juntos</h3>
+                <p class="date-subtitle">— desde 24 de agosto de 2024 —</p>
+                <p class="quote">"No es cuánto tiempo,<br>es con quién."</p>
+                <button class="btn-next" onclick="nextScreen(2, 3)">Te amo <i class="fa-solid fa-heart"></i></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- PANTALLA 3: Contador Detallado -->
+    <section id="screen3" class="screen hidden">
+
+        <button class="btn-back" onclick="goBack(3, 2)"><i class="fa-solid fa-arrow-left"></i></button>
+
+        <div class="card detailed-card">
+            <h2 class="title-cursive">Nuestro Amor <i class="fa-solid fa-heart heart-icon"></i></h2>
+            <p class="subtitle">Cada segundo a tu lado es mi lugar favorito.</p>
+            <img src="img/foto3.jpeg" alt="Nosotros" class="main-photo">
+            
+            <p class="juntos-desde">Juntos desde<br><i class="fa-solid fa-heart small-heart"></i></p>
+            <div class="counter-grid">
+                <div class="time-box"><span id="c-years">0</span><label>AÑOS</label></div>
+                <div class="time-separator">•</div>
+                <div class="time-box"><span id="c-months">0</span><label>MESES</label></div>
+                <div class="time-separator">•</div>
+                <div class="time-box"><span id="c-days">0</span><label>DÍAS</label></div>
+                <div class="time-separator">-</div>
+                <div class="time-box"><span id="c-hours">0</span><label>HORAS</label></div>
+                <div class="time-separator">•</div>
+                <div class="time-box"><span id="c-minutes">0</span><label>MINUTOS</label></div>
+                <div class="time-separator">•</div>
+                <div class="time-box"><span id="c-seconds">0</span><label>SEGUNDOS</label></div>
+            </div>
+            <button class="btn-next" onclick="nextScreen(3, 4)">Nuestra Historia <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+    </section>
+
+    <!-- PANTALLA 4: Galería de Recuerdos -->
+    <section id="screen4" class="screen hidden">
+        <button class="btn-back" onclick="goBack(4, 3)"><i class="fa-solid fa-arrow-left"></i></button>
+        
+        <!-- AÑO FANTASMA PARA EL SCROLL -->
+        <div id="ghostYear" class="ghost-year">2019</div>
+
+        <div class="gallery-header">
+            <h2 class="title-cursive">Para el Amor <br> de mi Vida</h2>
+            <p>He creado esta pequeña historia para recordarte cuánto te amo...</p>
+            <i class="fa-solid fa-heart heart-icon"></i>
+        </div>
+        <div class="gallery-grid" id="gallery">
+            <!-- Contenido dinámico generado por JS -->
+        </div>
+    </section>
+
+    <!-- MODAL PARA VER FOTOS EN GRANDE -->
+    <div id="imageModal" class="modal hidden">
+        <span class="close-modal" onclick="closeImageModal()"><i class="fa-solid fa-xmark"></i></span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <div id="heartsContainer" class="floating-hearts-container"></div>
+
+    <!-- AUDIO DE FONDO -->
+    <audio id="bgMusic" src="musica.mpeg" preload="auto" loop></audio>
+        
+   
+    <script src="script.js"></script>
+</body>
+</html>

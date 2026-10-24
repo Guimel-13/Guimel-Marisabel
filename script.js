@@ -1,0 +1,265 @@
+// --- LÓGICA DE NAVEGACIÓN ---
+function nextScreen(currentId, nextId) {
+    document.getElementById(`screen${currentId}`).classList.add('hidden');
+    document.getElementById(`screen${currentId}`).classList.remove('active');
+    
+    document.getElementById(`screen${nextId}`).classList.remove('hidden');
+    // Pequeño delay para que la transición css se note
+    setTimeout(() => {
+        document.getElementById(`screen${nextId}`).classList.add('active');
+    }, 50);
+}
+
+// --- LÓGICA DE LA HUELLA DACTILAR Y BOTÓN INGRESAR ---
+const fingerprintBtn = document.getElementById('fingerprintBtn');
+const fingerprintArea = document.getElementById('fingerprintArea');
+const scanText = document.getElementById('scanText');
+const btnIngresar = document.getElementById('btnIngresar');
+const bgMusic = document.getElementById('bgMusic'); 
+
+let holdTimer;
+const holdDuration = 2000; // 2 segundos manteniendo presionado
+
+// 1. Iniciar el escaneo
+function startScan(e) {
+    if (e.type === 'touchstart') {
+        e.preventDefault(); 
+    }
+    
+    fingerprintArea.classList.add('scanning');
+    
+    // NUEVO: Cambiamos el texto y le agregamos la clase de animación
+    scanText.innerText = "Escaneando...";
+    scanText.classList.add('scanning-text');
+    
+    holdTimer = setTimeout(() => {
+        fingerprintArea.style.display = 'none';
+        scanText.style.display = 'none';
+        btnIngresar.classList.remove('hidden');
+    }, holdDuration);
+}
+
+// 2. Detener el escaneo si suelta antes de tiempo
+function stopScan() {
+    clearTimeout(holdTimer);
+    fingerprintArea.classList.remove('scanning');
+    
+    // NUEVO: Revertimos el texto si suelta el dedo antes de los 2 segundos
+    scanText.innerText = "Mantén presionado para escanear...";
+    scanText.classList.remove('scanning-text');
+}
+
+// 3. El usuario hace clic en "Ingresar"
+function ingresar() {
+    // Reproducimos la música
+    bgMusic.play().catch(error => console.log("Error de audio:", error));
+    
+    // Pasamos a la Pantalla 2
+    nextScreen(1, 2);
+}
+
+// Eventos para PC
+fingerprintBtn.addEventListener('mousedown', startScan);
+fingerprintBtn.addEventListener('mouseup', stopScan);
+fingerprintBtn.addEventListener('mouseleave', stopScan);
+
+// Eventos para Móviles
+fingerprintBtn.addEventListener('touchstart', startScan, {passive: false});
+fingerprintBtn.addEventListener('touchend', stopScan);
+
+// --- LÓGICA DE FECHAS Y CONTADORES ---
+const startDate = new Date('2024-08-24T00:00:00'); // 24 de agosto de 2024
+
+function updateCounters() {
+    const now = new Date();
+    const diffTime = Math.abs(now - startDate);
+    
+    // Cálculo total de días (Pantalla 2)
+    const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    document.getElementById('total-days').innerHTML = `${totalDays} <i class="fa-solid fa-heart heart-icon"></i>`;
+
+    // Cálculo detallado (Pantalla 3)
+    let years = now.getFullYear() - startDate.getFullYear();
+    let months = now.getMonth() - startDate.getMonth();
+    let days = now.getDate() - startDate.getDate();
+    
+    if (days < 0) {
+        months--;
+        // Días en el mes anterior
+        const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+        days += prevMonth.getDate();
+    }
+    if (months < 0) {
+        years--;
+        months += 12;
+    }
+
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const seconds = now.getSeconds();
+
+    document.getElementById('c-years').innerText = years;
+    document.getElementById('c-months').innerText = months;
+    document.getElementById('c-days').innerText = days;
+    document.getElementById('c-hours').innerText = hours;
+    document.getElementById('c-minutes').innerText = minutes;
+    document.getElementById('c-seconds').innerText = seconds;
+}
+
+// Actualizar el contador cada segundo
+setInterval(updateCounters, 1000);
+updateCounters(); // Ejecutar inmediatamente al cargar
+
+
+// --- LÓGICA DE LA GALERÍA DE RECUERDOS (Pantalla 4) ---
+// Aquí puedes agregar tantas frases como quieras. El código creará las 45 imágenes automáticamente.
+const loveQuotes = [
+    "Mi lugar favorito es contigo.",
+    "Desde que te conocí, todo es mejor.",
+    "Coleccionando momentos...",
+    "Mi persona favorita.",
+    "Guimel y Marisabel por siempre.",
+    "Eres mi mejor casualidad.",
+    "Amor de mi vida.",
+    "Infinitamente tú."
+];
+
+const gallery = document.getElementById('gallery');
+
+// 1. Crear un arreglo con todos los números del 1 al 38
+let availablePhotos = [];
+for (let i = 1; i <= 9; i++) {
+    // 2. Excluir la foto 1 y la 26, que ya están en uso
+    if (i !== 1 && i !== 26) {
+        availablePhotos.push(i);
+    }
+}
+
+// 3. Recorrer los 36 números restantes para armar la galería
+availablePhotos.forEach(num => {
+    // Escoge una frase al azar
+    const randomQuote = loveQuotes[Math.floor(Math.random() * loveQuotes.length)];
+    const div = document.createElement('div');
+    div.className = 'memory-item';
+    
+    // AQUÍ ESTÁ LA CORRECCIÓN: Agregamos el onclick a la imagen
+    div.innerHTML = `
+        <img src="img/foto${num}.jpeg" alt="Recuerdo ${num}" onclick="openImageModal(this.src)" onerror="this.src='https://via.placeholder.com/400x500/1c1a1a/daba94?text=Foto+${num}'">
+        <div class="memory-overlay">${randomQuote}</div>
+    `;
+    gallery.appendChild(div);
+});
+
+
+// --- LÓGICA DEL VISOR DE IMÁGENES (MODAL) ---
+function openImageModal(src) {
+    const modal = document.getElementById("imageModal");
+    const modalImg = document.getElementById("modalImage");
+    modal.classList.remove("hidden");
+    modalImg.src = src; // Coloca la ruta de la foto clickeada
+}
+
+function closeImageModal() {
+    document.getElementById("imageModal").classList.add("hidden");
+}
+
+// --- LÓGICA DEL AÑO FANTASMA Y SCROLL ---
+const ghostYear = document.getElementById('ghostYear');
+let scrollTimeout;
+// Rango de años de relación (de 2024 a 2026)
+const years = [2024, 2025, 2026];
+
+window.addEventListener('scroll', () => {
+    // Solo ejecutamos este efecto si estamos en la Pantalla 4
+    if (!document.getElementById('screen4').classList.contains('active')) return;
+
+    // Calcular qué porcentaje del documento se ha scrolleado
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    
+    if (scrollHeight > 0) {
+        let scrollPercentage = scrollTop / scrollHeight;
+        
+        // Mapear el porcentaje al índice del arreglo de años
+        // Multiplicamos por el número de años para saber en cuál recae el scroll
+        let yearIndex = Math.floor(scrollPercentage * years.length);
+        
+        // Aseguramos no salir del límite del arreglo
+        if (yearIndex >= years.length) yearIndex = years.length - 1;
+
+        // Actualizar el texto del año
+        ghostYear.innerText = years[yearIndex];
+    }
+
+    // Hacemos visible el año con animación
+    ghostYear.classList.add('visible');
+
+    // Desaparecerlo suavemente al dejar de hacer scroll
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+        ghostYear.classList.remove('visible');
+    }, 700); // Se oculta tras 700 ms sin moverse
+});
+
+
+// --- LÓGICA DE VOLVER ATRÁS ---
+function goBack(currentId, prevId) {
+    // Ocultar pantalla actual
+    document.getElementById(`screen${currentId}`).classList.add('hidden');
+    document.getElementById(`screen${currentId}`).classList.remove('active');
+    
+    // Mostrar pantalla anterior
+    document.getElementById(`screen${prevId}`).classList.remove('hidden');
+    setTimeout(() => {
+        document.getElementById(`screen${prevId}`).classList.add('active');
+    }, 50);
+
+    // Si volvemos a la pantalla 1 (Escáner), reseteamos todo como al inicio
+    if (prevId === 1) {
+        document.getElementById('fingerprintArea').style.display = 'flex';
+        document.getElementById('scanText').style.display = 'block';
+        document.getElementById('scanText').innerText = "Mantén presionado para escanear...";
+        document.getElementById('scanText').classList.remove('scanning-text');
+        document.getElementById('btnIngresar').classList.add('hidden');
+        
+        // Pausamos la música y la regresamos al segundo 0
+        const bgMusic = document.getElementById('bgMusic');
+        bgMusic.pause();
+        bgMusic.currentTime = 0;
+    }
+}
+
+
+// --- LÓGICA DE CORAZONES FLOTANTES GLOBALES ---
+const heartsContainer = document.getElementById('heartsContainer');
+
+function createGlobalHeart() {
+    // Creamos el elemento del icono de corazón (usando FontAwesome)
+    const heart = document.createElement('i');
+    heart.classList.add('fa-solid', 'fa-heart', 'floating-heart');
+    
+    // Posición horizontal aleatoria (0% a 100% del ancho de la pantalla)
+    heart.style.left = Math.random() * 100 + 'vw';
+    
+    // Duración aleatoria de la animación (entre 4s y 8s para que no vayan todos a la misma velocidad)
+    const duration = Math.random() * (8 - 4) + 4;
+    heart.style.animationDuration = `${duration}s`;
+    
+    // Tamaño aleatorio para dar un efecto de profundidad (algunos más lejos, otros más cerca)
+    const size = Math.random() * (1.2 - 0.7) + 0.7;
+    heart.style.transform = `scale(${size})`;
+    
+    // Agregamos el corazón a la pantalla
+    heartsContainer.appendChild(heart);
+    
+    // Lo eliminamos del código una vez que termina su animación para no saturar el celular
+    setTimeout(() => {
+        heart.remove();
+    }, duration * 1000);
+}
+
+// Genera un corazón nuevo cada 800 milisegundos (0.8 segundos)
+// Si quieres más corazones, baja este número (ej. 400). Si quieres menos, súbelo (ej. 1200).
+setInterval(createGlobalHeart, 800);
+
+

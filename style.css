@@ -1,0 +1,575 @@
+/* =========================================
+   1. VARIABLES Y CONFIGURACIÓN GLOBAL
+   ========================================= */
+:root {
+    --bg-color: #121111;
+    --card-bg: #1c1a1a;
+    --text-main: #daba94;
+    --text-light: #a89f91;
+    --accent-color: #c46c71;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* =========================================
+   2. ESTRUCTURA DE PANTALLAS Y UTILIDADES
+   ========================================= */
+.screen {
+    position: relative;
+    width: 100%;
+    max-width: 450px;
+    min-height: 100vh;
+    padding: clamp(10px, 4vw, 20px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.screen.hidden, 
+.hidden {
+    display: none !important;
+    opacity: 0;
+}
+
+.title-cursive {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: clamp(1.8rem, 6vw, 2.2rem); 
+    text-align: center;
+    margin-bottom: clamp(10px, 3vh, 20px);
+    color: #ffffff;
+}
+
+/* =========================================
+   3. BOTONES GLOBALES
+   ========================================= */
+.btn-next {
+    background-color: var(--text-light);
+    color: white;
+    border: none;
+    padding: clamp(10px, 3vw, 12px) clamp(20px, 6vw, 30px);
+    border-radius: 25px;
+    font-size: clamp(0.9rem, 3.5vw, 1rem);
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+    font-family: 'Poppins', sans-serif;
+    margin-top: clamp(10px, 3vh, 15px);
+}
+
+.btn-next:hover {
+    transform: scale(1.05);
+    background-color: #a35559;
+}
+
+#btnIngresar {
+    background-color: #ff1e56;
+}
+
+.btn-back {
+    position: absolute;
+    top: clamp(15px, 4vh, 25px);
+    left: clamp(15px, 4vw, 25px);
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+    border: none;
+    width: clamp(35px, 10vw, 45px);
+    height: clamp(35px, 10vw, 45px);
+    border-radius: 50%;
+    font-size: clamp(1rem, 4vw, 1.2rem);
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.3s, transform 0.2s;
+    z-index: 10;
+}
+
+.btn-back:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+/* =========================================
+   4. PANTALLA 1: ESCÁNER DE HUELLA
+   ========================================= */
+.fingerprint-container {
+    position: relative;
+    width: clamp(120px, 40vw, 150px);
+    height: clamp(120px, 40vw, 150px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: clamp(20px, 6vh, 40px) 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.glow-background {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,30,86,0.15) 0%, rgba(0,0,0,0) 70%);
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.fingerprint-icon {
+    font-size: clamp(4rem, 12vw, 5rem);
+    color: #4a4a4a;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+.fingerprint-container:active .fingerprint-icon,
+.fingerprint-container.scanning .fingerprint-icon {
+    color: var(--accent-color);
+    text-shadow: 0 0 15px var(--accent-color);
+}
+
+.scanning .fingerprint-icon {
+    color: #ff1e56;
+    text-shadow: 0 0 15px rgba(255, 30, 86, 0.8);
+}
+
+.scanner-line {
+    position: absolute;
+    top: 15%;
+    left: 15%;
+    width: 70%;
+    height: 3px;
+    background: #ff1e56;
+    box-shadow: 0 0 15px 5px rgba(255, 30, 86, 0.6);
+    z-index: 3;
+    border-radius: 50%;
+    opacity: 0;
+}
+
+.scanning .scanner-line {
+    opacity: 1;
+    animation: scanMove 2s ease-in-out forwards;
+}
+
+@keyframes scanMove {
+    0% { top: 15%; }
+    50% { top: 85%; }
+    100% { top: 15%; }
+}
+
+.progress-ring {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: rotate(-90deg);
+    width: 100%;
+    height: 100%;
+}
+
+.progress-ring__circle {
+    stroke-dasharray: 427; 
+    stroke-dashoffset: 427;
+    stroke-width: 3;
+    filter: drop-shadow(0 0 5px rgba(255,30,86,0.8));
+    transition: stroke-dashoffset 2s linear; 
+}
+
+.scanning .progress-ring__circle {
+    stroke-dashoffset: 0;
+}
+
+.scan-text {
+    font-size: clamp(0.75rem, 3vw, 0.9rem);
+    color: var(--text-light);
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+}
+
+.scan-text.scanning-text {
+    color: #ff1e56;
+    text-shadow: 0 0 8px rgba(255, 30, 86, 0.5);
+    animation: pulseText 1s infinite alternate;
+}
+
+@keyframes pulseText {
+    from { opacity: 0.6; }
+    to { opacity: 1; }
+}
+
+/* =========================================
+   5. PANTALLAS 2 Y 3: TARJETAS Y CONTADOR
+   ========================================= */
+.card {
+    background-color: var(--card-bg);
+    border-radius: 20px;
+    padding: clamp(15px, 5vw, 20px);
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.main-photo {
+    width: 100%;
+    height: clamp(200px, 35vh, 350px);
+    object-fit: cover;
+    object-position: 50% 60%;
+    border-radius: 15px;
+    margin-bottom: clamp(10px, 3vh, 20px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    border: 1px solid rgba(218, 186, 148, 0.15);
+}
+
+.heart-icon {
+    color: var(--accent-color);
+}
+
+#total-days {
+    font-size: clamp(2.8rem, 12vw, 3.8rem);
+    font-weight: 600;
+    background: linear-gradient(45deg, #daba94, #f9e5ce, #daba94);
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0px 4px 10px rgba(0,0,0,0.4);
+    display: inline-block; 
+}
+
+.date-subtitle {
+    font-size: clamp(0.7rem, 2.5vw, 0.8rem);
+    color: var(--text-light);
+    margin: clamp(10px, 2vh, 15px) 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.quote {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(0.95rem, 4vw, 1.1rem);
+    line-height: 1.5;
+    margin-bottom: clamp(15px, 4vh, 25px);
+}
+
+.subtitle {
+    font-size: clamp(0.8rem, 3.5vw, 0.95rem);
+    color: var(--text-light);
+    margin-bottom: clamp(10px, 2vh, 15px);
+}
+
+.juntos-desde {
+    font-size: clamp(0.8rem, 3vw, 0.9rem);
+    margin-top: clamp(5px, 2vh, 10px);
+}
+
+.small-heart {
+    font-size: clamp(0.7rem, 2.5vw, 0.8rem);
+    margin: 5px 0 10px 0;
+}
+
+.counter-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(5px, 2vw, 10px);
+    margin-bottom: clamp(15px, 4vh, 30px);
+}
+
+.time-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.time-box span {
+    font-size: clamp(1.1rem, 5vw, 1.8rem);
+    font-weight: 500;
+}
+
+.time-box label {
+    font-size: clamp(0.5rem, 2vw, 0.6rem);
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.time-separator {
+    font-size: clamp(1.2rem, 5vw, 1.8rem);
+    color: var(--accent-color);
+    margin-top: -15px;
+}
+
+/* =========================================
+   6. PANTALLA 3: TEMA CLARO (SOBREESCRITURAS)
+   ========================================= */
+#screen3 {
+    background-color: #f4e8d9; 
+    padding: 0; 
+}
+
+#screen3 .btn-back {
+    color: #43382f;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+#screen3 .btn-back:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.detailed-card {
+    background-color: transparent;
+    box-shadow: none;
+    color: #43382f; 
+    padding: clamp(20px, 5vh, 30px) clamp(15px, 4vw, 20px);
+    min-height: 100vh;
+    height: auto; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.detailed-card .title-cursive {
+    color: #43382f; 
+    font-size: clamp(1.8rem, 7vw, 2.5rem);
+    margin-bottom: 5px;
+}
+
+.detailed-card .subtitle {
+    color: #6a5a4b;
+    font-size: clamp(0.8rem, 3.5vw, 0.95rem);
+    margin-bottom: clamp(10px, 2vh, 20px);
+}
+
+.detailed-card .main-photo {
+    border-radius: 10px;
+    height: clamp(220px, 40vh, 480px); 
+    margin-bottom: clamp(5px, 1.5vh, 10px);
+}
+
+.detailed-card .juntos-desde {
+    color: #6a5a4b;
+    font-size: clamp(0.8rem, 3vw, 0.9rem);
+    margin-top: clamp(10px, 2vh, 15px);
+}
+
+.detailed-card .time-box span {
+    color: #43382f;
+}
+
+.detailed-card .time-box label {
+    color: #6a5a4b;
+    font-weight: 600;
+}
+
+.detailed-card .time-separator {
+    color: #c94444; 
+}
+
+.detailed-card .heart-icon, 
+.detailed-card .small-heart {
+    color: #df3636; 
+}
+
+.detailed-card .btn-next {
+    background-color: #8c5b52; 
+    color: #f4e8d9; 
+    margin-top: clamp(15px, 4vh, 25px);
+    padding: clamp(10px, 3vw, 12px) clamp(30px, 8vw, 40px);
+}
+
+.detailed-card .btn-next:hover {
+    background-color: #734840;
+}
+
+/* =========================================
+   7. PANTALLA 4: GALERÍA DE RECUERDOS
+   ========================================= */
+.gallery-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: clamp(10px, 3vw, 15px);
+    width: 100%;
+    padding-bottom: 40px;
+}
+
+.memory-item {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 4/5;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.memory-item:hover, 
+.memory-item:active {
+    transform: scale(1.03); 
+    box-shadow: 0 8px 25px rgba(196, 108, 113, 0.5); 
+}
+
+.memory-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.memory-item:hover img, 
+.memory-item:active img {
+    transform: scale(1.1);
+}
+
+.memory-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px 10px 10px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.9));
+    color: white;
+    font-size: clamp(0.7rem, 2.5vw, 0.8rem);
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    transition: padding-bottom 0.3s ease;
+    pointer-events: none; 
+}
+
+.memory-item:hover .memory-overlay, 
+.memory-item:active .memory-overlay {
+    padding-bottom: 25px; 
+}
+
+/* =========================================
+   8. VISOR DE IMÁGENES (MODAL)
+   ========================================= */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(18, 17, 17, 0.95);
+    backdrop-filter: blur(5px);
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.modal.hidden {
+    display: none !important;
+    opacity: 0;
+}
+
+.modal-content {
+    max-width: 90%;
+    max-height: 85vh;
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(196, 108, 113, 0.4);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    object-fit: contain;
+}
+
+.modal:not(.hidden) .modal-content {
+    transform: scale(1);
+}
+
+.close-modal {
+    position: absolute;
+    top: clamp(20px, 4vh, 30px);
+    right: clamp(20px, 4vw, 30px);
+    color: #daba94;
+    font-size: 2.5rem;
+    cursor: pointer;
+    z-index: 101;
+    transition: color 0.3s;
+}
+
+.close-modal:hover {
+    color: #c46c71;
+}
+
+/* =========================================
+   9. EFECTOS GLOBALES (CORAZONES Y AÑO)
+   ========================================= */
+
+/* --- AÑO FANTASMA (Efecto de Scroll) --- */
+.ghost-year {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: clamp(6rem, 30vw, 12rem);
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.45); /* Color más visible */
+    text-shadow: 0 4px 25px rgba(0,0,0,0.6);
+    font-family: 'Poppins', sans-serif;
+    pointer-events: none;
+    z-index: 20; /* ¡Corregido para que flote sobre las imágenes! */
+    opacity: 0;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.ghost-year.visible {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.1); 
+}
+
+/* --- CORAZONES FLOTANTES GLOBALES --- */
+.floating-hearts-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; 
+    z-index: 5; 
+    overflow: hidden;
+}
+
+.floating-heart {
+    position: absolute;
+    bottom: -30px;
+    color: var(--accent-color); 
+    font-size: clamp(1rem, 3vw, 1.5rem);
+    opacity: 0.6;
+    animation: floatUp linear forwards;
+    filter: drop-shadow(0 0 5px rgba(196, 108, 113, 0.4));
+}
+
+@keyframes floatUp {
+    0% {
+        transform: translateY(0) scale(1) rotate(0deg);
+        opacity: 0.6;
+    }
+    100% {
+        transform: translateY(-110vh) scale(1.5) rotate(360deg);
+        opacity: 0;
+    }
+}
